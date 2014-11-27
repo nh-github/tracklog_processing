@@ -2,6 +2,7 @@
 """
 ...and, WHEEEEEE!
 """
+import logging
 import sys
 
 #import matplotlib as mpl
@@ -471,21 +472,24 @@ def main():
                      "lon": -157.8355,
                      "r": 50,
                      "flag": True}]
+    check_points = check_points
     in_path = '/shared/media/gps/tracks-c_1QF102036/2014/09/20140923.gpx'
-    in_path = '/shared/media/gps/tracks-c_1QF102036/2014/09/20140923a.gpx'
+    #in_path = '/shared/media/gps/tracks-c_1QF102036/2014/09/20140923a.gpx'
     #in_path = '/shared/media/gps/tracks-c_1QF102036/2014/10/20141002.gpx'
-    check_gpx(in_path)
-    load_gpx_track(in_path)
-    #foo_a(in_path)
-    #foo_b(in_path)
-    #pl = foo_c(in_path)
-    #split_track(pl)
-    #check_plotting()
-    #trk = load_gpx(in_path)
-    #trk = load_speeds(in_path)
-    #plot_track(trk)
-    #split_track(trk, geo_checks=check_points)
+    out_path = "foo.gpx"
+    gpx_proc().proc_file(in_path, out_path, fence_points)
 
 if "__main__" == __name__:
     main()
     sys.exit()
+
+def setup_logging():
+    log_fmt = ("%(levelname)s - %(module)s - %(name)s - "
+               "%(funcName)s @%(lineno)d: %(message)s")
+    log_fmt = ('%(levelname)s - '
+               '%(funcName)s @%(lineno)d: %(message)s')
+    #addl keys: asctime, module, name
+    logging.basicConfig(filename=None,
+                        format=log_fmt,
+                        level=logging.DEBUG)
+    return
