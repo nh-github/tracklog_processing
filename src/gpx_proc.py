@@ -476,8 +476,8 @@ def load_gpx_track(fp):
     #print 'LL:', extent[0], extent[2]
     #print 'UR:', extent[1], extent[3]
 
-    lon_0 = np.mean(extent[0:2])
-    lat_0 = np.mean(extent[2:])
+    #lon_0 = np.mean(extent[0:2])
+    #lat_0 = np.mean(extent[2:])
 
     # geometry type
     first = layer.GetFeature(0)
@@ -490,7 +490,6 @@ def load_gpx_track(fp):
     geomdb = json.loads(geom.ExportToJson())
     df = pd.DataFrame(geomdb['coordinates'][0], columns=['x', 'y'])
 
-
         #ExportToGML
         #ExportToJson
         #ExportToKML
@@ -501,14 +500,26 @@ def load_gpx_track(fp):
     ax.plot(df['x'], df['y'])
     plt.show()
 
-
     #tracks = []
     print "early return"
     return
 
 
 def main():
-    print "GPS tracklog work"
+    setup_logging()
+    logging.warn("GPS tracklog work")
+    fence_points = [{"label": "Mc Cully launch site (shore)",
+                     "lat": 21.2884,
+                     "lon": -157.8323,
+                     #"lat": 21.2880,  # Mc Cully launch site (midstream)
+                     #"lon": -157.8324,
+                     "r": 40,  # meters
+                     "flag": True},  # within the range
+                    {"label": "Library launch site (shore)",
+                     "lat": 21.2760,
+                     "lon": -157.8183,
+                     "r": 50,  # meters
+                     "flag": True}]
     check_points = [{"lat": 21.2873,
                      "lon": -157.8415,
                      "r": 50,  # 50 meters
