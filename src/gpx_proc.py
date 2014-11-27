@@ -505,6 +505,175 @@ def load_gpx_track(fp):
     return
 
 
+class gpx_proc(object):
+    """
+    extract an ``interesting'' segment from a tracklog file
+
+    call gpx_proc().proc_file(<input>, <output>, <geographic points>)
+    * input and output are paths to gpx files (output is created)
+    * geographic points are latitude/longitude to guide selection of
+        the interesting segment
+    """
+
+    def proc_file(self, inpath, outpath, checkpoints):
+        """
+        merge/trim to single track between pauses in motion at checkpoints
+
+        Process:
+        * open files
+        * load data
+        * check parameters (speed, location flags)
+        * create a subset
+        * clean track
+        * write data
+        * close files
+        """
+        logging.info("IN")
+        ifd = open(inpath, "r")
+        ofd = open(outpath, "w")
+        track_data = self.load_file(ifd)
+        #TODO: search track for slow (<1 km/h) spots
+        self.check_speed(track_data)
+        #TODO: search track for check points
+        self.check_loc_points(track_data.tracks[0], checkpoints)
+        #TODO: logic and split for interesting bit
+        #self.clip_track()
+        self.save_file(ofd, track_data)
+        logging.info("OUT")
+        return
+
+    def save_file(self, ofd, gpx_obj):
+        logging.info("IN")
+        ofd.write(gpx_obj.to_xml())
+        logging.info("OUT")
+        return
+
+    def load_file(self, ifd):
+        """
+        load as a single track
+        """
+        logging.info("IN")
+        gpx_parser = gpxpy.parser.GPXParser(ifd)
+        gpx_parser.parse()
+        parsed_gpx = gpx_parser.get_gpx()
+
+        # merge all tracks and track segments into a single track segment
+        new_gpx = gpxpy.gpx.GPX()
+        gpx_track = gpxpy.gpx.GPXTrack()
+        new_gpx.tracks.append(gpx_track)
+        gpx_segment = gpxpy.gpx.GPXTrackSegment()
+        gpx_track.segments.append(gpx_segment)
+        for track in parsed_gpx.tracks:
+            for segment in track.segments:
+                for point in segment.points:
+                    gpx_segment.points.append(point)
+
+        logging.info("OUT")
+        return new_gpx
+
+    def clip_file(self, gpx_track, outpath, checkpoints):
+        """
+        combine gpx_track and extra info to extract interesting section
+        """
+        logging.info("IN")
+        gpx_track.tracks[0].segments[0]
+        gpx_subset = gpx_track.clone()
+        #TODO: search track for slow (<1 km/h) spots
+        #TODO: search track for check points
+        #TODO: logic and split for interesting bit
+        logging.info("OUT")
+        return gpx_subset
+
+    def check_loc_points(self, gpx_track, loc_points):
+        """
+        find points within the specified range of location(s)
+
+        return a list of indices for the points
+        """
+        logging.info("IN")
+        print gpx_track
+        print loc_points
+        for i in dir(gpx_track):
+            if "get" in i.lower():
+                print i
+        #print help(gpx_track.get_points_data)
+        #print gpx_track.get_points_no()
+        #print help(gpx_track.get_point)
+        #print help(gpx_track.get_nearest_location)
+        logging.info("OUT")
+        return
+
+    def check_speed(self, gpx_data, slow_speed=1.0):
+        """
+        Calculate speed over track and index slow points (list)
+
+        NOTE: only checks first track segment (of first track)
+
+        refs:
+            https://stackoverflow.com/questions/20308253/\
+                    gpx-parsing-calculate-speed-python
+        """
+        logging.info("IN")
+        logging.info("length: {}".format(gpx.length_3d()))
+
+        point_list = gpx_data.tracks[0].segments[0].points
+        speed_units = (3600. / 1000)  # m/s -> km/h
+        for i in range(len(point_list)):
+            try:
+                p1 = point_list[i - 1]
+                p2 = point_list[i + 0]
+                p3 = point_list[i + 1]
+            except IndexError:
+                continue
+            s12 = p2.speed_between(p1)
+            s23 = p3.speed_between(p2)
+            s2avg = np.mean(np.array([s12, s23]))
+            s2mnl = p2.distance_3d(p1) / p2.time_difference(p1)  # m/s
+            point_list[i].speed = s2avg
+            if False and 0 < i and i < 5:
+                print ("{:3d}: {:0.2f} km/h"  # ", {:0.2f} m/s"
+                       ", {:0.2f} km/h, {:0.2f} km/h"
+                       "; d_12: {:0.2f} [meters]; foo: {:0.2f} [km/h]"
+                       "").format(i + 1,
+                                  s12 * speed_units, s23 * speed_units,
+                                  s2avg * speed_units, p2.distance_3d(p1),
+                                  s2mnl * speed_units,)
+        slow_indices = []
+        for i, point in enumerate(point_list):
+            point_kph = point.speed * speed_units
+            if point_kph < slow_speed:
+                slow_indices.append(i)
+                continue  # TODO: skip extra printing
+                print ("point #{} {:0.2f} km/h, {:0.4f} / {:0.4f}, {}"
+                       "").format(i, point_kph,
+                                  point.longitude,
+                                  point.latitude,
+                                  point.time)
+        logging.info("OUT")
+        return slow_indices
+
+    def foo(self):
+        logging.info("IN")
+        new_gpx = None
+        new_gpx.split(0, 0, 500)
+        print len(new_gpx.tracks[0].segments[0].points)
+        print len(new_gpx.tracks[0].segments[1].points)
+        #metadata_tags = ['author', 'creator', 'description', 'email',
+        #    'keywords', 'url', 'urlname', ]
+
+        #gpx.simplify()
+        ##simplify(self, max_distance=None)
+        #gpx.split()
+        ##split(self, track_no, track_segment_no, track_point_no)
+        logging.info("OUT")
+        return
+
+    def bar(self):
+        logging.info("IN")
+        logging.info("OUT")
+        return
+
+
 def main():
     setup_logging()
     logging.warn("GPS tracklog work")
