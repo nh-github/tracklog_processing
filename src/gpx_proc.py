@@ -239,6 +239,51 @@ def foo_c(fp):
     return point_list
 
 
+def sample_gpx_track_file_creation():
+    # Creating a new file:
+    # --------------------
+    gpx = gpxpy.gpx.GPX()
+
+    # Create first track in our GPX:
+    gpx_track = gpxpy.gpx.GPXTrack()
+    gpx.tracks.append(gpx_track)
+
+    # Create first segment in our GPX track:
+    gpx_segment = gpxpy.gpx.GPXTrackSegment()
+    gpx_track.segments.append(gpx_segment)
+
+    # Create points:
+    gpx_segment.points.append(gpxpy.gpx.GPXTrackPoint(2.1234,
+                                                      5.1234,
+                                                      elevation=1234))
+    gpx_segment.points.append(gpxpy.gpx.GPXTrackPoint(2.1235,
+                                                      5.1235,
+                                                      elevation=1235))
+    gpx_segment.points.append(gpxpy.gpx.GPXTrackPoint(2.1236,
+                                                      5.1236,
+                                                      elevation=1236))
+
+    #print dir(gpx)
+    ['add_missing_data', 'add_missing_elevations', 'add_missing_times',
+     'adjust_time', 'clone',
+     'get_bounds', 'get_duration', 'get_elevation_extremes',
+     'length_2d', 'length_3d',
+     'max_latitude', 'max_longitude', 'min_latitude', 'min_longitude',
+     'get_location_at', 'get_time_bounds',
+     'get_nearest_location', 'get_nearest_locations',
+     'get_points_data', 'get_points_no',
+     'get_track_points_no',
+     'move', 'name', 'reduce_points', 'refresh_bounds',
+     'simplify', 'smooth',
+     'split', 'time',
+     'tracks', 'routes',
+     'walk']
+
+    #print gpx.to_xml()
+    print "return"
+    return
+
+
 def split_track(track, geo_checks):
     df = track["data"]
     ms__kph = 3600. / 1000  # conversion for m/s to km/h
