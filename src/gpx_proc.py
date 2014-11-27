@@ -674,6 +674,18 @@ class gpx_proc(object):
         return
 
 
+def setup_logging():
+    log_fmt = ("%(levelname)s - %(module)s - %(name)s - "
+               "%(funcName)s @%(lineno)d: %(message)s")
+    log_fmt = ('%(levelname)s - '
+               '%(funcName)s @%(lineno)d: %(message)s')
+    #addl keys: asctime, module, name
+    logging.basicConfig(filename=None,
+                        format=log_fmt,
+                        level=logging.DEBUG)
+    return
+
+
 def main():
     setup_logging()
     logging.warn("GPS tracklog work")
@@ -707,14 +719,3 @@ def main():
 if "__main__" == __name__:
     main()
     sys.exit()
-
-def setup_logging():
-    log_fmt = ("%(levelname)s - %(module)s - %(name)s - "
-               "%(funcName)s @%(lineno)d: %(message)s")
-    log_fmt = ('%(levelname)s - '
-               '%(funcName)s @%(lineno)d: %(message)s')
-    #addl keys: asctime, module, name
-    logging.basicConfig(filename=None,
-                        format=log_fmt,
-                        level=logging.DEBUG)
-    return
