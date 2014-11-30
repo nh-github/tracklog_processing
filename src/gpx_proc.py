@@ -2,6 +2,7 @@
 """
 ...and, WHEEEEEE!
 """
+import datetime
 import logging
 import sys
 
@@ -533,11 +534,73 @@ class gpx_proc(object):
         ofd = open(outpath, "w")
         track_data = self.load_file(ifd)
         #TODO: search track for slow (<1 km/h) spots
-        self.check_speed(track_data)
+        slow_indices = self.check_speed(track_data)
         #TODO: search track for check points
-        self.check_loc_points(track_data.tracks[0], checkpoints)
+        check_indices = self.check_loc_points(track_data.tracks[0],
+                                              checkpoints)
         #TODO: logic and split for interesting bit
         #self.clip_track()
+        start_flag = False
+        stop_flag = False
+        slow_flag = False
+        check_flag = False
+        points_list = track_data.tracks[0].segments[0].points
+        for index, point in enumerate(points_list):
+            if index in slow_indices:
+                slow_flag = True
+                if (not slow_flag) and check_flag and (not start_flag):
+                    start_flag = True
+                    logging.warn("{} START FLAG ON".format(index))
+            else:
+                slow_flag = False
+            if index in check_indices:
+                check_flag = True
+            else:
+                check_flag = False
+                stop_flag = stop_flag
+
+        empty_col = np.zeros(len(points_list))
+        df = pd.DataFrame({"points": points_list,
+                           "slow_flags": empty_col,
+                           "check_flags": empty_col,
+                           })
+        df["slow_flags"][slow_indices] = 1
+        df["check_flags"][check_indices] = 1
+        end_pairs = []
+        end_pair = []
+        for index, point in enumerate(points_list):
+            if 0 == df["check_flags"][index]:
+                continue  # ignore possible endpoints away from checkpoints
+            if(0 == df["slow_flags"][index + 1] and
+               1 == df["slow_flags"][index]):
+                logging.warn("start: {}".format(index))
+                end_pair = [index]
+            if(1 == df["slow_flags"][index + 1] and
+               0 == df["slow_flags"][index] and
+               1 == len(end_pair)):
+                logging.warn(" stop: {}".format(index))
+                end_pair.append(index)
+                end_pairs.append(end_pair)
+                end_pair = []
+
+        #just take the longest span
+        logging.debug("find longest span..")
+        longest_pair = []
+        longest_time = datetime.timedelta(0)
+        for pair in end_pairs:
+            p0 = points_list[pair[0]]
+            p1 = points_list[pair[1]]
+            elapsed = p1.time - p0.time
+            logging.debug("{}..{}, {}; {}".format(p0.time, p1.time,
+                                                  elapsed, pair))
+            if longest_time < elapsed:
+                longest_time = elapsed
+                longest_pair = pair
+
+        logging.debug("longest span: {}, over {}s".format(longest_pair,
+                                                          longest_time))
+        # split the track at the start/stop indices
+
         self.save_file(ofd, track_data)
         logging.info("OUT")
         return
