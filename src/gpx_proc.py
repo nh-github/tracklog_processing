@@ -538,26 +538,6 @@ class gpx_proc(object):
         #TODO: search track for check points
         check_indices = self.check_loc_points(track_data.tracks[0],
                                               checkpoints)
-        #TODO: logic and split for interesting bit
-        #self.clip_track()
-        start_flag = False
-        stop_flag = False
-        slow_flag = False
-        check_flag = False
-        points_list = track_data.tracks[0].segments[0].points
-        for index, point in enumerate(points_list):
-            if index in slow_indices:
-                slow_flag = True
-                if (not slow_flag) and check_flag and (not start_flag):
-                    start_flag = True
-                    logging.warn("{} START FLAG ON".format(index))
-            else:
-                slow_flag = False
-            if index in check_indices:
-                check_flag = True
-            else:
-                check_flag = False
-                stop_flag = stop_flag
 
         empty_col = np.zeros(len(points_list))
         df = pd.DataFrame({"points": points_list,
