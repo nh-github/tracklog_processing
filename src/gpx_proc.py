@@ -536,7 +536,15 @@ class gpx_proc(object):
         slow_indices = self.check_speed(track_data)  # (slow is <1 km/h)
         check_indices = self.check_loc_points(track_data.tracks[0],
                                               checkpoints)
+        endpoints = self.select_subset(track_data, slow_indices, check_indices)
+        extracted_track = self.clip_track(track_data.tracks[0], endpoints)
 
+        self.save_file(ofd, extracted_track)
+        logging.info("OUT")
+        return
+
+    def select_subset(self, gpx_track, slow_indices, check_indices):
+        points_list = gpx_track.segments[0].points
         empty_col = np.zeros(len(points_list))
         df = pd.DataFrame({"points": points_list,
                            "slow_flags": empty_col,
@@ -577,11 +585,7 @@ class gpx_proc(object):
 
         logging.debug("longest span: {}, over {}s".format(longest_pair,
                                                           longest_time))
-        # split the track at the start/stop indices
-
-        self.save_file(ofd, track_data)
-        logging.info("OUT")
-        return
+        return longest_pair
 
     def save_file(self, ofd, gpx_obj):
         logging.info("IN")
@@ -612,7 +616,7 @@ class gpx_proc(object):
         logging.info("OUT")
         return new_gpx
 
-    def clip_file(self, gpx_track, outpath, checkpoints):
+    def clip_track(self, gpx_track, endpoints):
         """
         combine gpx_track and extra info to extract interesting section
         """
