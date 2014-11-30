@@ -637,7 +637,8 @@ class gpx_proc(object):
                     gpx-parsing-calculate-speed-python
         """
         logging.info("IN")
-        logging.info("length: {}".format(gpx.length_3d()))
+        logging.info("Overall length: {:0,.2f} meters"
+                     "".format(gpx_data.length_3d()))
 
         point_list = gpx_data.tracks[0].segments[0].points
         speed_units = (3600. / 1000)  # m/s -> km/h
