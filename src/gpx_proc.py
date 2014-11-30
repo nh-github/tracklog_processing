@@ -533,9 +533,7 @@ class gpx_proc(object):
         ifd = open(inpath, "r")
         ofd = open(outpath, "w")
         track_data = self.load_file(ifd)
-        #TODO: search track for slow (<1 km/h) spots
-        slow_indices = self.check_speed(track_data)
-        #TODO: search track for check points
+        slow_indices = self.check_speed(track_data)  # (slow is <1 km/h)
         check_indices = self.check_loc_points(track_data.tracks[0],
                                               checkpoints)
 
