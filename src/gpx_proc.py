@@ -536,7 +536,8 @@ class gpx_proc(object):
         slow_indices = self.check_speed(track_data)  # (slow is <1 km/h)
         check_indices = self.check_loc_points(track_data.tracks[0],
                                               checkpoints)
-        endpoints = self.select_subset(track_data, slow_indices, check_indices)
+        endpoints = self.select_subset(track_data.tracks[0], slow_indices,
+                                       check_indices)
         extracted_track = self.clip_track(track_data.tracks[0], endpoints)
 
         self.save_file(ofd, extracted_track)
@@ -585,10 +586,14 @@ class gpx_proc(object):
 
         logging.debug("longest span: {}, over {}s".format(longest_pair,
                                                           longest_time))
+
+        logging.info("{}".format(longest_pair))
+        logging.info("OUT")
         return longest_pair
 
     def save_file(self, ofd, gpx_obj):
         logging.info("IN")
+        #TODO: write valid gpx xml
         ofd.write(gpx_obj.to_xml())
         logging.info("OUT")
         return
@@ -621,13 +626,14 @@ class gpx_proc(object):
         combine gpx_track and extra info to extract interesting section
         """
         logging.info("IN")
-        gpx_track.tracks[0].segments[0]
         gpx_subset = gpx_track.clone()
-        #TODO: search track for slow (<1 km/h) spots
-        #TODO: search track for check points
-        #TODO: logic and split for interesting bit
+        gpx_subset.split(0, endpoints[1])
+        gpx_subset.split(0, endpoints[0])
+        #TODO: drop other segments, keep all else, or create valid structure
+        #gpx.simplify()
+        ##simplify(self, max_distance=None)
         logging.info("OUT")
-        return gpx_subset
+        return gpx_subset.segments[1]
 
     def check_loc_points(self, gpx_track, loc_points):
         """
@@ -734,11 +740,6 @@ class gpx_proc(object):
         ##simplify(self, max_distance=None)
         #gpx.split()
         ##split(self, track_no, track_segment_no, track_point_no)
-        logging.info("OUT")
-        return
-
-    def bar(self):
-        logging.info("IN")
         logging.info("OUT")
         return
 
