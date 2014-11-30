@@ -591,17 +591,40 @@ class gpx_proc(object):
         return a list of indices for the points
         """
         logging.info("IN")
-        print gpx_track
-        print loc_points
-        for i in dir(gpx_track):
-            if "get" in i.lower():
-                print i
+        points_list = gpx_track.segments[0].points
+        close_indices = []
+        for loc_pt in loc_points[:4]:
+            print ("LOC: {lon:0.5f} {lat:0.5f} "
+                   "[{label}] r: {r:} m").format(**loc_pt)
+            cp = gpxpy.gpx.GPXTrackPoint(loc_pt["lat"],
+                                         loc_pt["lon"],
+                                         name=loc_pt["label"])
+            for i, point in enumerate(points_list):
+                d = cp.distance_2d(point)
+                if d < loc_pt["r"]:
+                    close_indices.append(i)
+                    continue
+                    print ("{} "
+                           "{:0.5f} {:0.5f} "
+                           "closeness: {:0.2f} "
+                           "t: {}"
+                           "").format(i,
+                                      point.longitude,
+                                      point.latitude,
+                                      cp.distance_2d(point),
+                                      point.time,)
+        #print points_list[1]
+        #p1 = points_list[509]
+        #p2 = points_list[511]
+        #print p1.distance_3d(p2)
+        #print p1.speed_between(p2)
+        #print p1.speed_between(p2) * 3.6
         #print help(gpx_track.get_points_data)
         #print gpx_track.get_points_no()
         #print help(gpx_track.get_point)
         #print help(gpx_track.get_nearest_location)
         logging.info("OUT")
-        return
+        return close_indices
 
     def check_speed(self, gpx_data, slow_speed=1.0):
         """
