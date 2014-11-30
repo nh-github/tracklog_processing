@@ -593,7 +593,6 @@ class gpx_proc(object):
 
     def save_file(self, ofd, gpx_obj):
         logging.info("IN")
-        #TODO: write valid gpx xml
         ofd.write(gpx_obj.to_xml())
         logging.info("OUT")
         return
@@ -629,11 +628,22 @@ class gpx_proc(object):
         gpx_subset = gpx_track.clone()
         gpx_subset.split(0, endpoints[1])
         gpx_subset.split(0, endpoints[0])
-        #TODO: drop other segments, keep all else, or create valid structure
-        #gpx.simplify()
-        ##simplify(self, max_distance=None)
+
+        # Create a new record
+        gpx_data = gpxpy.gpx.GPX()
+
+        # Create a track
+        gpx_track = gpxpy.gpx.GPXTrack()
+        gpx_data.tracks.append(gpx_track)
+
+        # Add the segment of interest to the track
+        #gpx_segment = gpxpy.gpx.GPXTrackSegment()
+        gpx_track.segments.append(gpx_subset.segments[1])
+
+        #gpx_track.simplify()  # simple copy for now
+
         logging.info("OUT")
-        return gpx_subset.segments[1]
+        return gpx_data
 
     def check_loc_points(self, gpx_track, loc_points):
         """
