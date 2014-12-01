@@ -8,6 +8,7 @@ TODO: specify check points
 
 __version__ = 0.7
 
+import argparse
 import datetime
 import logging
 import os
@@ -784,6 +785,25 @@ class gpx_proc(object):
         logging.info("OUT")
         return
 
+def parse_command_line(command_line):
+    parser = argparse.ArgumentParser(description="GPS tracklog work")
+    parser.add_argument("-v", "--verbose", action="count", default=0,
+                        dest="verbosity", help="verbose output")
+    parser.add_argument("-q", "--quiet", action="count", default=0,
+                        dest="unverbosity", help="quiet output")
+    parser.add_argument("-V", "--version", "--VERSION", action="version",
+                        version="%(prog)s {}".format(__version__))
+    #-h/--help is auto-added
+    parser.add_argument("-i", "--in", action="store", default=None,
+                        required=True, help="input path (required)")
+    # TODO: default output path based on to input path
+    parser.add_argument("-o", "--out", action="store")
+    # TODO: allow check point specification on command line.
+    #   allow multiple points added, one per argument
+    parser.add_argument("-p", "--check-point", action="store")
+    ret = vars(parser.parse_args())
+    return ret
+
 
 def setup_logging():
     log_fmt = ("%(levelname)s - %(module)s - %(name)s - "
@@ -798,9 +818,9 @@ def setup_logging():
 
 
 def main():
+    cmd_args = parse_command_line(sys.argv)
     setup_logging()
-    logging.warn("GPS tracklog work")
-    fence_points = [{"label": "Mc Cully launch site (shore)",
+    check_points = [{"label": "Mc Cully launch site (shore)",
                      "lat": 21.2884,
                      "lon": -157.8323,
                      #"lat": 21.2880,  # Mc Cully launch site (midstream)
@@ -812,20 +832,14 @@ def main():
                      "lon": -157.8183,
                      "r": 50,  # meters
                      "flag": True}]
-    check_points = [{"lat": 21.2873,
-                     "lon": -157.8415,
-                     "r": 50,  # 50 meters
-                     "flag": True},  # within the range
-                    {"lat": 21.2887,
-                     "lon": -157.8355,
-                     "r": 50,
-                     "flag": True}]
-    check_points = check_points
-    in_path = '/shared/media/gps/tracks-c_1QF102036/2014/09/20140923.gpx'
+
+    #in_path = '/shared/media/gps/tracks-c_1QF102036/2014/09/20140923.gpx'
     #in_path = '/shared/media/gps/tracks-c_1QF102036/2014/09/20140923a.gpx'
     #in_path = '/shared/media/gps/tracks-c_1QF102036/2014/10/20141002.gpx'
-    out_path = "foo.gpx"
-    gpx_proc().proc_file(in_path, out_path, fence_points)
+    #out_path = "foo.gpx"
+    in_path = cmd_args["in"]
+    out_path = cmd_args["out"]
+    gpx_proc().proc_file(in_path, out_path, check_points)
 
 if "__main__" == __name__:
     main()
