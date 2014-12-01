@@ -598,7 +598,10 @@ class gpx_proc(object):
         logging.debug("longest span: {}, over {}s".format(longest_pair,
                                                           longest_time))
 
-        logging.info("{}".format(longest_pair))
+        if longest_time > datetime.timedelta(0, 60):
+            logging.info("{}".format(longest_pair))
+        else:
+            longest_pair = None
         logging.info("OUT")
         return longest_pair
 
