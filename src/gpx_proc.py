@@ -538,16 +538,19 @@ class gpx_proc(object):
         """
         logging.info("IN")
         ifd = open(inpath, "r")
-        ofd = open(outpath, "w")
         track_data = self.load_file(ifd)
         slow_indices = self.check_speed(track_data)  # (slow is <1 km/h)
         check_indices = self.check_loc_points(track_data.tracks[0],
                                               checkpoints)
         endpoints = self.select_subset(track_data.tracks[0], slow_indices,
                                        check_indices)
-        extracted_track = self.clip_track(track_data.tracks[0], endpoints)
-
-        self.save_file(ofd, extracted_track)
+        if endpoints:
+            extracted_track = self.clip_track(track_data.tracks[0], endpoints)
+            #TODO: re-runnable without creating many files
+            ofd = open(self.make_outpath(inpath, outpath), "w")
+            self.save_file(ofd, extracted_track)
+        else:
+            logging.error("No usable subset found")
         logging.info("OUT")
         return
 
