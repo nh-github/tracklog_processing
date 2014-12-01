@@ -1,7 +1,13 @@
 #! /usr/bin/env python
 """
-...and, WHEEEEEE!
+Copy interesting subset of tracklog from gpx file
+
+Specify input file path (autogenerate output path)
+TODO: specify check points
 """
+
+__version__ = 0.7
+
 import datetime
 import logging
 import sys
