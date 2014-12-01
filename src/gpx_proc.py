@@ -10,6 +10,7 @@ __version__ = 0.7
 
 import datetime
 import logging
+import os
 import sys
 
 #import matplotlib as mpl
@@ -625,6 +626,27 @@ class gpx_proc(object):
 
         logging.info("OUT")
         return new_gpx
+
+    def make_outpath(self, inpath, outpath):
+        """
+        Generate an output path based on input path if needed/requested
+        """
+        logging.info("IN")
+        if outpath is not None:
+            logging.info("OUT")
+            candidate = outpath
+        else:
+            d, f = os.path.split(inpath)
+            b, e = os.path.splitext(f)
+            candidate = inpath
+            i = 0
+            while os.path.exists(candidate):
+                mod = chr(i + ord("a"))
+                i += 1
+                candidate = os.path.join(d, b + "-" + mod + e)
+
+        logging.info("OUT")
+        return candidate
 
     def clip_track(self, gpx_track, endpoints):
         """
